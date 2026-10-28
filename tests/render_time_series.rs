@@ -5,7 +5,7 @@
 use rdom_charts::{DataPoint, Series, TimeSeriesChart, TimeSeriesView};
 use rdom_tui::render::{Buffer, LayoutExt, PaintExt, Rect};
 use rdom_tui::style::{CascadeExt, Stylesheet, TuiStyle};
-use rdom_tui::{Size, TuiDom};
+use rdom_tui::{Size, TuiDom, TuiNodeExt, TuiNodeMutExt};
 
 /// cascade → layout → paint into a fresh buffer.
 fn render(dom: &mut TuiDom, sheet: &Stylesheet, viewport: Rect) -> Buffer {
@@ -21,12 +21,11 @@ fn count_braille(buf: &Buffer) -> usize {
     let mut n = 0;
     for y in area.y..area.bottom() {
         for x in area.x..area.right() {
-            if let Some(c) = buf.cell(x, y) {
-                if let Some(ch) = c.symbol().chars().next() {
-                    if ('\u{2800}'..='\u{28FF}').contains(&ch) {
-                        n += 1;
-                    }
-                }
+            if let Some(c) = buf.cell(x, y)
+                && let Some(ch) = c.symbol().chars().next()
+                && ('\u{2800}'..='\u{28FF}').contains(&ch)
+            {
+                n += 1;
             }
         }
     }
@@ -151,4 +150,38 @@ fn streaming_view_updates_through_handle() {
 
     let buf = render(&mut dom, &sheet, viewport);
     assert!(count_braille(&buf) > 10, "streaming data should rasterize");
+}
+
+/// The README's quick-start: a chart canvas appended straight under the
+/// document root, sized by node setters, fills the viewport. Since rdom
+/// 0.6 the root lays out in block flow, so a top-level element fills the
+/// screen with a percentage height — `Size::Flex` sizes a flex item only.
+#[test]
+fn readme_quick_start_canvas_fills_the_viewport() {
+    let series = vec![Series::line(
+        "cpu",
+        (0..120)
+            .map(|i| DataPoint::new(i as f64, (i as f64 * 0.1).sin() * 40.0 + 50.0))
+            .collect(),
+    )];
+    let view = TimeSeriesView::new(TimeSeriesChart::new_static(series));
+
+    let mut dom = TuiDom::new();
+    let root = dom.root();
+    let canvas = view.mount(&mut dom);
+    dom.append_child(root, canvas).unwrap();
+    dom.node_mut(canvas)
+        .set_width(Size::Percent(100.0))
+        .set_height(Size::Percent(100.0));
+
+    let viewport = Rect::new(0, 0, 80, 24);
+    let buf = render(&mut dom, &Stylesheet::new(), viewport);
+
+    let rect = dom.node(canvas).layout_rect().expect("canvas laid out");
+    assert_eq!(
+        (rect.x, rect.y, rect.width, rect.height),
+        (0, 0, 80, 24),
+        "the quick-start canvas fills the viewport"
+    );
+    assert!(count_braille(&buf) > 0, "the chart paints into it");
 }

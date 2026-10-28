@@ -23,7 +23,7 @@ use rdom_charts::{
     YAxisConfig,
 };
 use rdom_tui::{
-    App, Color, ControlFlow, ListenerOptions, NodeId, Padding, Size, Stylesheet, TuiDom,
+    App, BoxSizing, Color, ControlFlow, ListenerOptions, NodeId, Padding, Size, Stylesheet, TuiDom,
     TuiNodeExt, TuiNodeMutExt, TuiStyle,
 };
 
@@ -310,15 +310,14 @@ fn flex_col() -> TuiStyle {
 fn main() -> io::Result<()> {
     let mut dom = TuiDom::new();
     let root = dom.root();
-    style(&mut dom, root, flex_col());
 
     let container = dom.create_element("div");
     style(
         &mut dom,
         container,
         flex_col()
-            .width(Size::Flex(1))
-            .height(Size::Flex(1))
+            .height(Size::Percent(100.0))
+            .box_sizing(BoxSizing::BorderBox)
             .padding(Padding::all(1))
             .gap(1),
     );
@@ -335,7 +334,9 @@ fn main() -> io::Result<()> {
     style(
         &mut dom,
         canvas,
-        TuiStyle::new().width(Size::Flex(1)).height(Size::Flex(1)),
+        TuiStyle::new()
+            .width(Size::Flex(1.0))
+            .height(Size::Flex(1.0)),
     );
     dom.append_child(container, canvas).unwrap();
     dom.set_focused(Some(canvas));
@@ -429,7 +430,7 @@ fn main() -> io::Result<()> {
 
     // Stream the live demos on idle ticks.
     let g = gallery.clone();
-    let app = App::new(dom, Stylesheet::new())?.on_tick(move |ctx| {
+    let app = App::new(dom, Stylesheet::new())?.with_tick_handler(move |ctx| {
         if g.borrow_mut().stream() {
             ctx.request_redraw();
         }

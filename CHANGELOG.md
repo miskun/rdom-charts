@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+Ported to `rdom-tui` 0.6. The chart types and their behavior are unchanged, but `rdom-tui`'s types
+(`Color`, `TuiDom`, `NodeId`, `RenderContext`) appear in this crate's public API, so this is a
+breaking release (0.2.0) for anyone still on `rdom-tui` 0.3.
+
+### Changed
+
+- **Depends on `rdom-tui = "0.6.0"`** (was `0.3.14`); `rust-version` raised to 1.88 to match.
+- **Filling the screen:** rdom 0.6 lays the document root out in block flow, so a chart canvas (or
+  its container) placed at the top level fills the viewport with `height: 100%`
+  (`Size::Percent(100.0)`, plus `box-sizing: border-box` when it has padding). `Size::Flex(1.0)`
+  there now gives it no height. The README quick-start and all four examples use the new form; see
+  rdom's `UPGRADING-0.6.md` (`sc-root-block`).
+- Examples use `Size::Flex(1.0)` (an `f32` weight since rdom 0.6) and `App::with_tick_handler`
+  (was `App::on_tick`).
+
 ## [0.1.0]
 
 First release: terminal **chart components** for [rdom](https://github.com/miskun/rdom),

@@ -11,7 +11,9 @@ use rdom_charts::{
 };
 use rdom_tui::render::{Buffer, LayoutExt, PaintExt, Rect};
 use rdom_tui::style::{CascadeExt, Stylesheet};
-use rdom_tui::{Color, Direction, NodeId, Padding, Size, TuiDom, TuiNodeMutExt, TuiStyle};
+use rdom_tui::{
+    BoxSizing, Color, Direction, NodeId, Padding, Size, TuiDom, TuiNodeMutExt, TuiStyle,
+};
 
 /// A `display: flex` style in `dir`, via the 0.3 convenience builders.
 fn flex(dir: Direction) -> TuiStyle {
@@ -37,15 +39,14 @@ fn label(dom: &mut TuiDom, parent: NodeId, text: &str) {
 /// example; kept in sync by eye.
 pub fn build_dashboard(dom: &mut TuiDom) {
     let root = dom.root();
-    style(dom, root, flex(Direction::Column));
 
     let container = dom.create_element("div");
     style(
         dom,
         container,
         flex(Direction::Column)
-            .width(Size::Flex(1))
-            .height(Size::Flex(1))
+            .height(Size::Percent(100.0))
+            .box_sizing(BoxSizing::BorderBox)
             .padding(Padding::all(1))
             .gap(1),
     );
@@ -59,7 +60,7 @@ pub fn build_dashboard(dom: &mut TuiDom) {
         dom,
         gauges,
         flex(Direction::Row)
-            .width(Size::Flex(1))
+            .width(Size::Flex(1.0))
             .height(Size::Fixed(1))
             .gap(3),
     );
@@ -80,7 +81,9 @@ pub fn build_dashboard(dom: &mut TuiDom) {
         style(
             dom,
             g,
-            TuiStyle::new().width(Size::Flex(1)).height(Size::Fixed(1)),
+            TuiStyle::new()
+                .width(Size::Flex(1.0))
+                .height(Size::Fixed(1)),
         );
         dom.append_child(gauges, g).unwrap();
     }
@@ -97,7 +100,9 @@ pub fn build_dashboard(dom: &mut TuiDom) {
     style(
         dom,
         bars,
-        TuiStyle::new().width(Size::Flex(1)).height(Size::Fixed(4)),
+        TuiStyle::new()
+            .width(Size::Flex(1.0))
+            .height(Size::Fixed(4)),
     );
     dom.append_child(container, bars).unwrap();
 
@@ -143,7 +148,9 @@ pub fn build_dashboard(dom: &mut TuiDom) {
     style(
         dom,
         ts,
-        TuiStyle::new().width(Size::Flex(1)).height(Size::Flex(1)),
+        TuiStyle::new()
+            .width(Size::Flex(1.0))
+            .height(Size::Flex(1.0)),
     );
     dom.append_child(container, ts).unwrap();
 }
@@ -153,10 +160,10 @@ fn dump(buf: &Buffer) -> String {
     let mut s = String::new();
     for y in area.y..area.bottom() {
         for x in area.x..area.right() {
-            if let Some(c) = buf.cell(x, y) {
-                if !c.is_spacer() {
-                    s.push_str(c.symbol());
-                }
+            if let Some(c) = buf.cell(x, y)
+                && !c.is_spacer()
+            {
+                s.push_str(c.symbol());
             }
         }
         s.push('\n');

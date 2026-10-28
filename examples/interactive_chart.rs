@@ -21,7 +21,9 @@
 use std::io;
 
 use rdom_charts::{DataPoint, Series, TimeSeriesChart, TimeSeriesView};
-use rdom_tui::{App, NodeId, Padding, Size, Stylesheet, TuiDom, TuiNodeMutExt, TuiStyle};
+use rdom_tui::{
+    App, BoxSizing, NodeId, Padding, Size, Stylesheet, TuiDom, TuiNodeMutExt, TuiStyle,
+};
 
 fn style(dom: &mut TuiDom, id: NodeId, s: TuiStyle) {
     dom.node_mut(id).set_inline_style(s);
@@ -41,7 +43,6 @@ fn main() -> io::Result<()> {
 
     let mut dom = TuiDom::new();
     let root = dom.root();
-    style(&mut dom, root, TuiStyle::new().flex_column());
 
     let container = dom.create_element("div");
     style(
@@ -49,8 +50,8 @@ fn main() -> io::Result<()> {
         container,
         TuiStyle::new()
             .flex_column()
-            .width(Size::Flex(1))
-            .height(Size::Flex(1))
+            .height(Size::Percent(100.0))
+            .box_sizing(BoxSizing::BorderBox)
             .padding(Padding::all(1))
             .gap(1),
     );
@@ -68,7 +69,9 @@ fn main() -> io::Result<()> {
     style(
         &mut dom,
         canvas,
-        TuiStyle::new().width(Size::Flex(1)).height(Size::Flex(1)),
+        TuiStyle::new()
+            .width(Size::Flex(1.0))
+            .height(Size::Flex(1.0)),
     );
     dom.append_child(container, canvas).unwrap();
 

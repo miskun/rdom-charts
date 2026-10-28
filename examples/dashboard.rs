@@ -22,7 +22,8 @@ use rdom_charts::{
     SparklineView, TimeSeriesChart, TimeSeriesView,
 };
 use rdom_tui::{
-    App, Color, Direction, NodeId, Padding, Size, Stylesheet, TuiDom, TuiNodeMutExt, TuiStyle,
+    App, BoxSizing, Color, Direction, NodeId, Padding, Size, Stylesheet, TuiDom, TuiNodeMutExt,
+    TuiStyle,
 };
 
 fn flex(dir: Direction) -> TuiStyle {
@@ -46,15 +47,14 @@ fn label(dom: &mut TuiDom, parent: NodeId, text: &str) {
 
 fn build(dom: &mut TuiDom) {
     let root = dom.root();
-    style(dom, root, flex(Direction::Column));
 
     let container = dom.create_element("div");
     style(
         dom,
         container,
         flex(Direction::Column)
-            .width(Size::Flex(1))
-            .height(Size::Flex(1))
+            .height(Size::Percent(100.0))
+            .box_sizing(BoxSizing::BorderBox)
             .padding(Padding::all(1))
             .gap(1),
     );
@@ -68,7 +68,7 @@ fn build(dom: &mut TuiDom) {
         dom,
         gauges,
         flex(Direction::Row)
-            .width(Size::Flex(1))
+            .width(Size::Flex(1.0))
             .height(Size::Fixed(1))
             .gap(3),
     );
@@ -89,7 +89,9 @@ fn build(dom: &mut TuiDom) {
         style(
             dom,
             g,
-            TuiStyle::new().width(Size::Flex(1)).height(Size::Fixed(1)),
+            TuiStyle::new()
+                .width(Size::Flex(1.0))
+                .height(Size::Fixed(1)),
         );
         dom.append_child(gauges, g).unwrap();
     }
@@ -106,7 +108,9 @@ fn build(dom: &mut TuiDom) {
     style(
         dom,
         bars,
-        TuiStyle::new().width(Size::Flex(1)).height(Size::Fixed(4)),
+        TuiStyle::new()
+            .width(Size::Flex(1.0))
+            .height(Size::Fixed(4)),
     );
     dom.append_child(container, bars).unwrap();
 
@@ -152,7 +156,9 @@ fn build(dom: &mut TuiDom) {
     style(
         dom,
         ts,
-        TuiStyle::new().width(Size::Flex(1)).height(Size::Flex(1)),
+        TuiStyle::new()
+            .width(Size::Flex(1.0))
+            .height(Size::Flex(1.0)),
     );
     dom.append_child(container, ts).unwrap();
 }

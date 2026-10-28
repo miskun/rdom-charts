@@ -10,7 +10,7 @@
 //! arrive — the chart is in follow mode, so the 20-second window slides
 //! to track the live edge.
 //!
-//! Pattern: `App::on_tick` fires whenever the loop is idle (default
+//! Pattern: `App::with_tick_handler` fires whenever the loop is idle (default
 //! ~50 ms). Each tick pushes a sample through the shared `TimeSeriesView`
 //! handle and asks the runtime to repaint. The chart state lives behind
 //! the view's `Rc<RefCell>`, so the tick closure mutates it and the
@@ -22,7 +22,7 @@ use std::time::Instant;
 use rdom_charts::palette::series_color;
 use rdom_charts::{ConnectPolicy, DataPoint, SeriesStyle, TimeSeriesChart, TimeSeriesView};
 use rdom_tui::{
-    App, ControlFlow, NodeId, Padding, Size, Stylesheet, TuiDom, TuiNodeMutExt, TuiStyle,
+    App, BoxSizing, ControlFlow, NodeId, Padding, Size, Stylesheet, TuiDom, TuiNodeMutExt, TuiStyle,
 };
 
 fn flex_col() -> TuiStyle {
@@ -48,15 +48,14 @@ fn main() -> io::Result<()> {
 
     let mut dom = TuiDom::new();
     let root = dom.root();
-    style(&mut dom, root, flex_col());
 
     let container = dom.create_element("div");
     style(
         &mut dom,
         container,
         flex_col()
-            .width(Size::Flex(1))
-            .height(Size::Flex(1))
+            .height(Size::Percent(100.0))
+            .box_sizing(BoxSizing::BorderBox)
             .padding(Padding::all(1))
             .gap(1),
     );
@@ -72,14 +71,16 @@ fn main() -> io::Result<()> {
     style(
         &mut dom,
         canvas,
-        TuiStyle::new().width(Size::Flex(1)).height(Size::Flex(1)),
+        TuiStyle::new()
+            .width(Size::Flex(1.0))
+            .height(Size::Flex(1.0)),
     );
     dom.append_child(container, canvas).unwrap();
 
     // Drive the stream from the idle tick.
     let stream = view.clone();
     let start = Instant::now();
-    let app = App::new(dom, Stylesheet::new())?.on_tick(move |ctx| {
+    let app = App::new(dom, Stylesheet::new())?.with_tick_handler(move |ctx| {
         let t = start.elapsed().as_secs_f64();
         stream.with(|c| {
             let v = (t * 1.3).sin() * 30.0 + (t * 0.5).cos() * 15.0 + 55.0;

@@ -2,7 +2,7 @@
 name = "rdom-charts"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 license = "MIT"
 description = "Terminal charts for rdom — time-series, sparkline, bar, and gauge, braille/block-rasterized onto a <canvas>."
 repository = "https://github.com/miskun/rdom-charts"
@@ -24,4 +24,4 @@ include = [
 [dependencies]
 # Public rdom-tui surface only (canvas paint API, Color/Style, element
 # builders, event listeners). No path dep, no private hooks.
-rdom-tui = "0.3.14"  # 0.3.4+: focus tint is control-scoped, so a focused <canvas> stays transparent
+rdom-tui = "0.6.0"  # 0.6: Size::Flex(f32), App::with_tick_handler; 0.3.4+: a focused <canvas> stays transparent

@@ -18,10 +18,10 @@ fn has_full_block(buf: &Buffer) -> bool {
     let area = buf.area;
     for y in area.y..area.bottom() {
         for x in area.x..area.right() {
-            if let Some(c) = buf.cell(x, y) {
-                if c.symbol() == "\u{2588}" {
-                    return true;
-                }
+            if let Some(c) = buf.cell(x, y)
+                && c.symbol() == "\u{2588}"
+            {
+                return true;
             }
         }
     }

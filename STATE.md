@@ -27,8 +27,44 @@ independent of the paint layer so it's unit-testable; the thin paint step draws 
 - Charts rasterize onto a `BrailleGrid` (2×4 dots/cell), then flush into a `ctx.sub(...)` rect.
 - State lives behind `Rc<RefCell<…>>` (the `*View` types) so the paint closure can borrow it and
   the app can mutate it between frames, then request a repaint.
-- `rdom-tui` is a plain crates.io dependency (**`"0.3.14"`** as of 2026-06-07) — no path dep, so
+- `rdom-tui` is a plain crates.io dependency (**`"0.6.0"`** as of 2026-10-28) — no path dep, so
   this crate builds standalone and never reaches into the rdom source tree.
+
+## 2026-10-28 — ported to rdom-tui 0.6.0
+
+Bumped the dep `"0.3.14" → "0.6.0"` (and `rust-version` 1.85 → 1.88, rdom's MSRV). Unlike the 0.3.x
+bumps this one was breaking. **The library itself compiled unchanged**; examples and tests did not.
+The chart contract (math, rasterizers, `*View` handles, paint through `RenderContext`) needed no change.
+
+What changed and why (each is a documented rdom 0.6 change, see `../rdom/UPGRADING-0.6.md`):
+- **Compile breaks (examples/tests only):** `Size::Flex` takes an `f32` (`Flex(1.0)`);
+  `App::on_tick` → `App::with_tick_handler`; `KeyboardDetail` is `#[non_exhaustive]`, so the
+  interaction test builds keys with `KeyboardDetail::new(key, KeyboardModifiers::default())`.
+- **Root lays out in block flow (`sc-root-block`).** The dashboard test still compiled but the
+  `latency` chart got zero height: the top container's `height: Size::Flex(1.0)` no longer fills
+  the viewport. Fixed the real way, per the guide: `height: 100%` + `box-sizing: border-box` on the
+  top container (it has 1-cell padding), in the test and all four examples. The `flex_column()`
+  inline style on `dom.root()` was a no-op under 0.6 and was removed. The README quick-start had
+  the same bug (canvas at the root with `Size::Flex` height → 0 rows); it is now
+  `Size::Percent(100.0)` and pinned by `render_time_series::readme_quick_start_canvas_fills_the_viewport`
+  (red: an 80×0 canvas; green: 80×24). README snippet also gained its missing `TuiNodeMutExt` import.
+- **`computed.bg` starts transparent (`sc-transparent-bg`).** "No background" is now a zero-alpha
+  `Color::TRANSPARENT`, and `Color::Reset` is a painted terminal-default fill. The focused-canvas
+  test now asserts `bg.alpha() == 0`; the contract (a focused chart canvas is never tinted) holds.
+  `src/` never reads `bg` or uses `Reset`, so no library change.
+- **Toolchain drift:** the current stable clippy flags `collapsible_if` in five test helpers;
+  collapsed into let-chains (stable since 1.88 = the new MSRV).
+
+Review pass (dependency port, not a milestone; short form):
+- Architect — strong: the math-vs-paint split meant zero library changes across a breaking
+  substrate release. No blocking findings. Non-blocking: the dashboard example and
+  `tests/render_dashboard.rs` still duplicate the layout "kept in sync by eye" — both were edited
+  identically here, but that is the drift risk to watch.
+- API — blocking: none. The crate re-exposes rdom-tui 0.6 types, so the release is **0.2.0**, not
+  0.1.x; not published yet (needs the owner's go-ahead). Examples are interactive TUIs and were
+  build-checked, not run; their layout is pinned by the dashboard render test.
+- Out of scope: `rdom-virtualtable` is still on 0.3.14 and needs a real port (its column sizing
+  moved into rdom's table layout); deferred.
 
 ## 2026-06-07 — bumped to rdom-tui 0.3.14 + pre-publish review
 
@@ -233,7 +269,7 @@ demoed. Now demoed (Spiky) + pinned headless in `tests/render_ts_demos.rs` (asse
 
 ## Resolved (was "open questions")
 
-- **Publish form:** crates.io `rdom-tui = "0.3.4"`, no path dep.
+- **Publish form:** crates.io `rdom-tui = "0.6.0"`, no path dep.
 - **Repaint signaling:** resolved in rdom 0.3.0 (`EventCtx::request_redraw`) + wired into the
   components' interaction.
 - **Runnable examples:** shipped — `dashboard`, `live_chart`, `interactive_chart`,

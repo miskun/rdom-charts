@@ -7,16 +7,10 @@ use rdom_tui::{Event, EventDetail, KeyboardDetail, KeyboardModifiers, TuiDom};
 
 fn keydown(key: &str) -> Event {
     let mut e = Event::new("keydown");
-    e.detail = EventDetail::Keyboard(Box::new(KeyboardDetail {
-        key: key.into(),
-        modifiers: KeyboardModifiers {
-            ctrl: false,
-            shift: false,
-            alt: false,
-            meta: false,
-        },
-        repeat: false,
-    }));
+    e.detail = EventDetail::Keyboard(Box::new(KeyboardDetail::new(
+        key,
+        KeyboardModifiers::default(),
+    )));
     e
 }
 
@@ -94,10 +88,12 @@ fn canvas_is_made_focusable() {
 /// UA focus tint to interactive controls, so a `<canvas>` (a replaced/content
 /// element the app paints) is never tinted. (Earlier: 0.3.1 carried an
 /// explicit `canvas:focus` exemption; 0.3.0 filled it gray via the generic
-/// `:focus` tint.)
+/// `:focus` tint.) Since rdom 0.6 "no background" reads as a zero-alpha
+/// `bg` (`background-color`'s initial `transparent`); `Color::Reset` would
+/// be a painted terminal-default fill.
 #[test]
 fn focused_chart_canvas_keeps_transparent_background() {
-    use rdom_tui::style::{CascadeExt, Color, Stylesheet};
+    use rdom_tui::style::{CascadeExt, Stylesheet};
     use rdom_tui::{Size, TuiNodeExt, TuiNodeMutExt, TuiStyle};
 
     let (_view, mut dom, canvas) = mounted();
@@ -109,9 +105,10 @@ fn focused_chart_canvas_keeps_transparent_background() {
     dom.set_focused(Some(canvas));
     dom.cascade(&Stylesheet::new()); // includes the UA sheet
 
+    let bg = dom.node(canvas).computed().unwrap().bg;
     assert_eq!(
-        dom.node(canvas).computed().unwrap().bg,
-        Color::Reset,
-        "a focused chart canvas must stay transparent (rdom 0.3.4 control-scoped focus tint)"
+        bg.alpha(),
+        0,
+        "a focused chart canvas must stay transparent (rdom 0.3.4 control-scoped focus tint), got {bg:?}"
     );
 }

@@ -654,7 +654,7 @@ impl TimeSeriesView {
 
     /// Create a `<canvas>` element wired to paint this chart and return
     /// its `NodeId`. The caller appends it into the tree and sizes it
-    /// (e.g. `dom.node_mut(id).set_width(Size::Flex(1))`).
+    /// (e.g. `dom.node_mut(id).set_width(Size::Percent(100.0))`).
     pub fn mount(&self, dom: &mut TuiDom) -> NodeId {
         let id = dom.create_element("canvas");
         self.attach(dom, id);

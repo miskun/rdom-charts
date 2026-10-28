@@ -18,7 +18,7 @@ smooth in a cell grid. Nothing reaches into rdom internals.
 ```toml
 [dependencies]
 rdom-charts = "0.1"
-rdom-tui = "0.3.14"
+rdom-tui = "0.6.0"
 ```
 
 Requires Rust 1.85+ (edition 2024).
@@ -49,7 +49,7 @@ Controls: `+`/`-` zoom · `h`/`l` or ←/→ pan · `0` reset · wheel zoom · d
 
 ```rust
 use rdom_charts::{DataPoint, Series, TimeSeriesChart, TimeSeriesView};
-use rdom_tui::{Size, TuiDom};
+use rdom_tui::{Size, TuiDom, TuiNodeMutExt};
 
 let series = vec![Series::line(
     "cpu",
@@ -61,7 +61,7 @@ let mut dom = TuiDom::new();
 let root = dom.root();
 let canvas = view.mount(&mut dom);
 dom.append_child(root, canvas).unwrap();
-dom.node_mut(canvas).set_width(Size::Flex(1)).set_height(Size::Flex(1));
+dom.node_mut(canvas).set_width(Size::Percent(100.0)).set_height(Size::Percent(100.0));
 
 // Stream new samples later, then ask the runtime to repaint:
 view.with(|chart| { chart.push_points(0, &[DataPoint::new(120.0, 72.0)]); chart.tick(120.0); });

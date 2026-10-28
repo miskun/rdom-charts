@@ -25,10 +25,10 @@ fn render(view: &TimeSeriesView, w: u16, h: u16) -> String {
     let mut s = String::new();
     for y in 0..h {
         for x in 0..w {
-            if let Some(c) = buf.cell(x, y) {
-                if !c.is_spacer() {
-                    s.push_str(c.symbol());
-                }
+            if let Some(c) = buf.cell(x, y)
+                && !c.is_spacer()
+            {
+                s.push_str(c.symbol());
             }
         }
         s.push('\n');

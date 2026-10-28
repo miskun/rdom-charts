@@ -19,12 +19,11 @@ fn count_braille(buf: &Buffer) -> usize {
     let mut n = 0;
     for y in area.y..area.bottom() {
         for x in area.x..area.right() {
-            if let Some(c) = buf.cell(x, y) {
-                if let Some(ch) = c.symbol().chars().next() {
-                    if ('\u{2800}'..='\u{28FF}').contains(&ch) {
-                        n += 1;
-                    }
-                }
+            if let Some(c) = buf.cell(x, y)
+                && let Some(ch) = c.symbol().chars().next()
+                && ('\u{2800}'..='\u{28FF}').contains(&ch)
+            {
+                n += 1;
             }
         }
     }
