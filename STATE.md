@@ -61,8 +61,9 @@ Review pass (dependency port, not a milestone; short form):
   `tests/render_dashboard.rs` still duplicate the layout "kept in sync by eye" — both were edited
   identically here, but that is the drift risk to watch.
 - API — blocking: none. The crate re-exposes rdom-tui 0.6 types, so the release is **0.2.0**, not
-  0.1.x; not published yet (needs the owner's go-ahead). Examples are interactive TUIs and were
-  build-checked, not run; their layout is pinned by the dashboard render test.
+  0.1.x. The owner ran all four examples by hand (fill the screen, gauges split, live streaming,
+  keys and mouse in `interactive_chart`, no focus tint): fine. Released to crates.io as 0.2.0 on
+  2026-10-28 (tag `v0.2.0`). The dashboard layout stays pinned by its render test.
 - Out of scope: `rdom-virtualtable` is still on 0.3.14 and needs a real port (its column sizing
   moved into rdom's table layout); deferred.
 

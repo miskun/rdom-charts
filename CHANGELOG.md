@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-10-28
+
 Ported to `rdom-tui` 0.6. The chart types and their behavior are unchanged, but `rdom-tui`'s types
 (`Color`, `TuiDom`, `NodeId`, `RenderContext`) appear in this crate's public API, so this is a
-breaking release (0.2.0) for anyone still on `rdom-tui` 0.3.
+breaking release for anyone still on `rdom-tui` 0.3.
 
 ### Changed
 
@@ -47,5 +49,6 @@ built strictly on `rdom-tui`'s public `<canvas>` paint API. Each chart is a pure
 
 Built on `rdom-tui = "0.3.14"`; no path dependency and no reach into rdom internals.
 
-[Unreleased]: https://github.com/miskun/rdom-charts/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/miskun/rdom-charts/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/miskun/rdom-charts/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/miskun/rdom-charts/releases/tag/v0.1.0
